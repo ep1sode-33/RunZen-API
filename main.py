@@ -126,10 +126,10 @@ async def call_911():
     # Placeholder function to call 911
     print("Calling 911...")
     try:
-        print("Calling 911...")
+        twilio_client = Client(account_sid, auth_token)
 
         # Make a call
-        call = Client.calls.create(
+        call = twilio_client.calls.create(
             to=recipient_number,
             from_=twilio_number,
             url="http://demo.twilio.com/docs/voice.xml"  # Replace with your TwiML Bin URL
