@@ -23,6 +23,8 @@ class PasswordRequest(BaseModel):
     uuid: str
     password: str
 
+class uuidRequest(BaseModel):
+    uuid: str
 
 # Dependency: Check API key
 def check_auth(authorization: str = Header(None)):
@@ -83,7 +85,7 @@ def validate_password(request: PasswordRequest, auth: str = Depends(check_auth))
 
 # **Timeout Timer**
 @app.post("/v1/timeout_start")
-def timeout_start(request: PasswordRequest, auth: str = Depends(check_auth)):
+def timeout_start(request: uuidRequest, auth: str = Depends(check_auth)):
     uuid = request.uuid
 
     # Find device
@@ -97,7 +99,7 @@ def timeout_start(request: PasswordRequest, auth: str = Depends(check_auth)):
 
 # **Check Timer**
 @app.post("/v1/timeout_check")
-def timeout_check(request: PasswordRequest, auth: str = Depends(check_auth)):
+def timeout_check(request: uuidRequest, auth: str = Depends(check_auth)):
     uuid = request.uuid
 
     # Find device
