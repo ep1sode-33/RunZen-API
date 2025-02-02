@@ -56,7 +56,7 @@ def set_password(request: PasswordRequest, auth: str = Depends(check_auth)):
         collection.update_one({"uuid": uuid}, {"$set": {"password": hashed_password}})
     else:
         # Insert new record
-        collection.insert_one({"uuid": uuid, "password": hashed_password})
+        collection.insert_one({"uuid": uuid, "password": hashed_password, "timer": 0})
 
     return {"message": "Password set successfully"}
 
@@ -75,11 +75,39 @@ def validate_password(request: PasswordRequest, auth: str = Depends(check_auth))
 
     # Verify password
     if bcrypt.checkpw(password.encode(), user["password"]):
+        # Update timer
+        collection.update_one({"uuid": uuid}, {"$set": {"timer": 0}})
         return {"message": "Password validated successfully"}
     else:
         raise HTTPException(status_code=401, detail="Invalid password")
 
+# **Timeout Timer**
+@app.post("/v1/timeout_start")
+def timeout_start(request: PasswordRequest, auth: str = Depends(check_auth)):
+    uuid = request.uuid
 
+    # Find device
+    user = collection.find_one({"uuid": uuid})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="UUID not found")
+    else:
+        collection.update_one({"uuid": uuid}, {"$set": {"timer": 1}})
+        return {"message": "Timer started successfully"}
+
+# **Check Timer**
+@app.post("/v1/timeout_check")
+def timeout_check(request: PasswordRequest, auth: str = Depends(check_auth)):
+    uuid = request.uuid
+
+    # Find device
+    user = collection.find_one({"uuid": uuid})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="UUID not found")
+    else:
+        return {"timer": user["timer"]}
+    
 # Run the service (local debugging)
 if __name__ == "__main__":
     import uvicorn
