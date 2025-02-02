@@ -110,8 +110,14 @@ def timeout_check(request: uuidRequest, auth: str = Depends(check_auth)):
     else:
         timercache = user["timer"]
         collection.update_one({"uuid": uuid}, {"$set": {"timer": 0}})
+        if timercache == 1:
+            call_911()
         return {"timer": timercache}
-    
+
+async def call_911():
+    # Placeholder function to call 911
+    print("Calling 911...")
+
 # Run the service (local debugging)
 if __name__ == "__main__":
     import uvicorn
