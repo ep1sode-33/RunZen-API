@@ -108,7 +108,9 @@ def timeout_check(request: uuidRequest, auth: str = Depends(check_auth)):
     if not user:
         raise HTTPException(status_code=404, detail="UUID not found")
     else:
-        return {"timer": user["timer"]}
+        timercache = user["timer"]
+        collection.update_one({"uuid": uuid}, {"$set": {"timer": 0}})
+        return {"timer": timercache}
     
 # Run the service (local debugging)
 if __name__ == "__main__":
