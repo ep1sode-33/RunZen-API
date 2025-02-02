@@ -4,9 +4,17 @@ from pymongo import MongoClient
 import bcrypt
 import os
 from dotenv import load_dotenv
+from twilio.rest import Client
+from twilio.twiml.voice_response import VoiceResponse
+import asyncio
 
 # Load environment variables
 load_dotenv()
+
+account_sid = os.gotenv("ACCOUNT_SID")
+auth_token = os.gotenv("AUTH_TOKEN")
+twilio_number = "+18447570192"
+recipient_number = "+12676157773"  # Recipient's number
 
 # Connect to MongoDB
 MONGO_URI = "mongodb://localhost:27017"
@@ -111,12 +119,27 @@ def timeout_check(request: uuidRequest, auth: str = Depends(check_auth)):
         timercache = user["timer"]
         collection.update_one({"uuid": uuid}, {"$set": {"timer": 0}})
         if timercache == 1:
-            call_911()
+            asyncio.run(call_911())
         return {"timer": timercache}
 
 async def call_911():
     # Placeholder function to call 911
     print("Calling 911...")
+    try:
+        print("Calling 911...")
+
+        # Make a call
+        call = client.calls.create(
+            to=recipient_number,
+            from_=twilio_number,
+            url="http://demo.twilio.com/docs/voice.xml"  # Replace with your TwiML Bin URL
+        )
+
+        print(f"Call initiated! SID: {call.sid}")
+
+    except Exception as e:
+        print(f"Error making call: {e}")
+
 
 # Run the service (local debugging)
 if __name__ == "__main__":
