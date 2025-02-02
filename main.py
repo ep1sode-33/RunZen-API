@@ -11,8 +11,8 @@ import asyncio
 # Load environment variables
 load_dotenv()
 
-account_sid = os.gotenv("ACCOUNT_SID")
-auth_token = os.gotenv("AUTH_TOKEN")
+account_sid = os.getenv("ACCOUNT_SID")
+auth_token = os.getenv("AUTH_TOKEN")
 twilio_number = "+18447570192"
 recipient_number = "+12676157773"  # Recipient's number
 
