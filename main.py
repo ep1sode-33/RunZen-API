@@ -129,7 +129,7 @@ async def call_911():
         print("Calling 911...")
 
         # Make a call
-        call = client.calls.create(
+        call = Client.calls.create(
             to=recipient_number,
             from_=twilio_number,
             url="http://demo.twilio.com/docs/voice.xml"  # Replace with your TwiML Bin URL
