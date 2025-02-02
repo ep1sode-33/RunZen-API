@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse
 import asyncio
+from run_predictionFINAL import predict_safety, get_filtered_nearby_places
 
 # Load environment variables
 load_dotenv()
@@ -33,6 +34,15 @@ class PasswordRequest(BaseModel):
 
 class uuidRequest(BaseModel):
     uuid: str
+
+class addressRequest(BaseModel):
+    uuid: str
+    address: str
+
+class predictRequest(BaseModel):
+    uuid: str
+    latitude: float
+    longitude: float
 
 # Dependency: Check API key
 def check_auth(authorization: str = Header(None)):
@@ -139,6 +149,53 @@ async def call_911():
 
     except Exception as e:
         print(f"Error making call: {e}")
+
+address = ""
+
+# **Update Dangerous address**
+@app.post("/v1/update_address")
+def update_address(request: addressRequest, auth: str = Depends(check_auth)):
+    global address
+    uuid = request.uuid
+
+    # Find device
+    user = collection.find_one({"uuid": uuid})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="UUID not found")
+    else:
+        address = request.address
+        return {"message": "Spot added"}
+
+# **Get Dangerous address**
+@app.post("/v1/get_address")
+def get_address(request: uuidRequest, auth: str = Depends(check_auth)):
+    global address
+    uuid = request.uuid
+
+    # Find device
+    user = collection.find_one({"uuid": uuid})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="UUID not found")
+    else:
+        return {"address": address}
+
+# **Predict Safety**
+@app.post("/v1/predict")
+def predict(request: predictRequest, auth: str = Depends(check_auth)):
+    uuid = request.uuid
+    latitude = request.latitude
+    longitude = request.longitude
+
+    user = collection.find_one({"uuid": uuid})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="UUID not found")
+    else:
+        places = get_filtered_nearby_places(latitude, longitude, radius=2500)
+        predicted_safety = predict_safety(places)
+        return {"safety": predicted_safety}
 
 
 # Run the service (local debugging)
